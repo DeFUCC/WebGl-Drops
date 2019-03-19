@@ -4,17 +4,35 @@ body {
   margin: 0px;
   overflow: hidden;
   cursor:url(../cursor-01.png), auto;
+  font-family:sans-serif;
 }
 
-.dots{
-  background-image:;
+#overlay{
+  background-color:none;
   background-repeat: no-repeat;
   background-position: center;
   width: 100%;
   height:100%;
-  opacity: .1;
+  opacity: .5;
+  z-index:10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: 1s ease;
 }
 
+
+#overlay h1 {
+  font-weight:lighter;
+  font-size: 6em;
+  margin-bottom:0px;
+}
+
+#overlay h2{
+  margin-top:0px;
+  font-weight:lighter;
+  font-size: 1em;
+}
 
 .wrapper{
   position:absolute;
@@ -25,8 +43,9 @@ body {
   text-align: center;
 }
 
-.grad {
-  background: #d8efff;
+#back {
+  transition: 1s ease;
+  background: #000;
 }
 .metaball-canvas{
   width:100%;
