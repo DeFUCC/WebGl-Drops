@@ -1,0 +1,37 @@
+body {
+  background-color: #101010;
+  color: #fff;
+  margin: 0px;
+  overflow: hidden;
+  cursor:url(../cursor-01.png), auto;
+}
+
+.dots{
+  background-image:;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 100%;
+  height:100%;
+  opacity: .1;
+}
+
+
+.wrapper{
+  position:absolute;
+  top:0px;
+  left:0px;
+  width: 100%;
+  height:100%;
+  text-align: center;
+}
+
+.grad {
+  background: #d8efff;
+}
+.metaball-canvas{
+  width:100%;
+  height:100%;
+  position: absolute;
+  top:0;
+  left:0;
+}
