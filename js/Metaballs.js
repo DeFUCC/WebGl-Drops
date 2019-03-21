@@ -1,5 +1,5 @@
 /**
- * Created by mpirdis on 11/04/2017.
+ * Created by mpirdis on 11/04/2017. Updated by davay on 21/03/2019
  */
 
 function Metaballs(gl, config, targetScreenSize,layerId){
@@ -162,10 +162,12 @@ function Metaballs(gl, config, targetScreenSize,layerId){
         }
 
         dataToSendToGPU = new Float32Array(3 * (count+1));
+        var lastIndex, lastRadius;
         for (var i = 0; i < count; i++) {
             var baseIndex = 3 * i;
             var mb = metaballsObjects[i];
-
+            lastIndex = baseIndex;
+            lastRadius = mb.radius;
             dataToSendToGPU[baseIndex + 0] = mb.x;
             dataToSendToGPU[baseIndex + 1] = mb.y;
             dataToSendToGPU[baseIndex + 2] = mb.radius;// * animationProperties.radiusMultiplier;
@@ -192,8 +194,8 @@ function Metaballs(gl, config, targetScreenSize,layerId){
         //TweenMax.to(animationProperties, 2.0, {radiusMultiplier:1.0, delay:0., ease:Elastic.easeOut.config(1, 0.4) });
         //TweenMax.to(animationProperties, 1.7, {radiusMultiplier:1.0, delay:0., ease:Power2.easeInOut });
         //TweenMax.to(animationProperties, 2.4, {positionMultiplier:1.0, delay:0.0, ease:Power1.easeInOut});
-        TweenMax.to(animationProperties, 2, {radiusMultiplier:1.0, delay:0, ease:Back.easeOut });
-        TweenMax.to(animationProperties, 5, {positionMultiplier:1.0, delay:0, ease:Back.easeOut});
+        TweenMax.to(animationProperties, 2, {radiusMultiplier:1.0, delay:0, ease:{_p1: 1.70158,_p2: 2.5949095}});
+        TweenMax.to(animationProperties, 5, {positionMultiplier:1.0, delay:0, ease:{_p1: 1.70158,_p2: 2.5949095}});
     }
 
     /**
@@ -227,6 +229,7 @@ function Metaballs(gl, config, targetScreenSize,layerId){
         var resolutionScale = Math.min(window.innerWidth / (targetScreenSize != null ? targetScreenSize : 1920), 1.0);
 
         // Update positions and speeds
+
         var radius=drops.radius
         var count = config.metaballs.length;
         var centerX = displayWidth * .5;
@@ -263,11 +266,12 @@ function Metaballs(gl, config, targetScreenSize,layerId){
             lastRadius=mb.radius
         }
 
-        if(layerId==drops.cursorLayer-1) {
+        if(layerId == drops.cursorLayer-1) {
           dataToSendToGPU[lastIndex + 3] = mousePosition.x;
           dataToSendToGPU[lastIndex + 4] = mousePosition.y;
           dataToSendToGPU[baseIndex + 5] = (drops.radiusControl*lastRadius*animationProperties.radiusMultiplier) * resolutionScale;
           lastIndex=baseIndex;
+
         }
         else {
           dataToSendToGPU[lastIndex + 3] = 0;

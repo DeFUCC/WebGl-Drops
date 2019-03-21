@@ -12,6 +12,7 @@ const drops = {
     maxMultiplierArcY: 5,
     scale: 1.5
   },
+  count:14,
   radius: 20,
   radiusControl:1,
   back:document.getElementById('back').style,
@@ -46,7 +47,6 @@ function onClick(event) {
 
 function onWheel(event) {
   let {deltaX,deltaY}=event;
-  console.log(event)
   if (drops.radiusControl>0 && deltaY<0) {
     drops.radiusControl-=0.005;
   }
@@ -102,10 +102,10 @@ drops.layers =[
       stop: 0.1
     }, {
       color: '#b1f324',
-      stop: .20
+      stop: .5
     }, {
       color: '#a2c25d',
-      stop: .4
+      stop: .8
     }]
   },
   {
@@ -113,13 +113,13 @@ drops.layers =[
     angle:false,
     gradient:[{
       color: '#3cbda7',
-      stop: 0.25
+      stop: 0.1
     }, {
       color: '#28917a',
       stop: .60
     }, {
       color: '#00af9e',
-      stop: 0.78
+      stop: 0.9
     }]
   },
   {
@@ -130,7 +130,7 @@ drops.layers =[
       stop: 0.0
     }, {
       color: '#e24926',
-      stop: 0.7
+      stop: 0.4
     }, {
       color: '#c8246c',
       stop: .8
@@ -143,18 +143,17 @@ drops.layers =[
     radius:0.7,
     angle:true,
     gradient:[{
-      color: '#ff4920',
-      stop: 0.2
+      color: '#f7ff01',
+      stop: 0.1
     }, {
       color: '#ffc700',
-      stop: .35
+      stop: .3
     }, {
       color: '#ede058',
-      stop: .55
+      stop: .6
     }, {
       color: '#ffd40d',
-      stop: .75
-    }, {
+      stop: .9,
       color: '#ff9100',
       stop: 1.0
     }]
@@ -254,7 +253,7 @@ function initialize() {
   drops.layers.forEach(
     layer => {
       metaballGroup.push({
-        metaballs: generateMetaballs(12,layer.radius),
+        metaballs: generateMetaballs(drops.count,layer.radius),
         texture: generateGradientTexture(layer.gradient, layer.angle, false)
       })
     }
