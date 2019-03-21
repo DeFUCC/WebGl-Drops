@@ -2,7 +2,7 @@
  * Created by mpirdis on 11/04/2017.
  */
 
-function Metaballs(gl, config, targetScreenSize){
+function Metaballs(gl, config, targetScreenSize,layerId){
 
     var program;
     var metaballsObjects = [];
@@ -98,19 +98,6 @@ function Metaballs(gl, config, targetScreenSize){
         gl.bindTexture(gl.TEXTURE_2D, colorTexture);
         gl.uniform1i(gl.getUniformLocation(program, 'uColorSampler'), 0);
 
-        noiseTexture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, noiseTexture);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT );
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT );
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, assets['noise3']);
-        gl.generateMipmap(gl.TEXTURE_2D);
-        gl.bindTexture(gl.TEXTURE_2D, null);
-        gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, noiseTexture);
-        gl.uniform1i(gl.getUniformLocation(program, 'uNoiseSampler'), 1);
-
         resolutionUniform = getUniformLocation(program, 'uResolution');
         gl.uniform2f (resolutionUniform,  gl.canvas.width, gl.canvas.height);
     }
@@ -174,7 +161,7 @@ function Metaballs(gl, config, targetScreenSize){
             mb.targRadius = mb.radius + (( Math.cos( ( mb.t + time ) * mb.speed ) * 5 ) + ( Math.sin( ( mb.t + time ) * mb.speed ) * 5 ));// * animationProperties.positionMultiplier;
         }
 
-        dataToSendToGPU = new Float32Array(3 * count);
+        dataToSendToGPU = new Float32Array(3 * (count+1));
         for (var i = 0; i < count; i++) {
             var baseIndex = 3 * i;
             var mb = metaballsObjects[i];
@@ -265,20 +252,35 @@ function Metaballs(gl, config, targetScreenSize){
         // To send the data to the GPU, we first need to
         // flatten our data into a single array.
         //var dataToSendToGPU = new Float32Array(3 * count);
+        let lastIndex;
         for (var i = 0; i < count; i++) {
             var baseIndex = 3 * i;
             var mb = metaballsObjects[i];
             dataToSendToGPU[baseIndex + 0] = mb.x;
             dataToSendToGPU[baseIndex + 1] = mb.y;
             dataToSendToGPU[baseIndex + 2] = (mb.radius * drops.radiusControl*animationProperties.radiusMultiplier) * resolutionScale;
+            lastIndex=baseIndex;
+            lastRadius=mb.radius
         }
+
+        if(layerId==drops.cursorLayer-1) {
+          dataToSendToGPU[lastIndex + 3] = mousePosition.x;
+          dataToSendToGPU[lastIndex + 4] = mousePosition.y;
+          dataToSendToGPU[baseIndex + 5] = (drops.radiusControl*lastRadius*animationProperties.radiusMultiplier) * resolutionScale;
+          lastIndex=baseIndex;
+        }
+        else {
+          dataToSendToGPU[lastIndex + 3] = 0;
+          dataToSendToGPU[lastIndex + 4] = 0;
+          dataToSendToGPU[baseIndex + 5] = 0;
+        }
+
 
         gl.useProgram(program);
         gl.uniform1f(timeUniform, time);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, colorTexture);
-        gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, noiseTexture);
+
         gl.enable(gl.BLEND);
         //gl.blendFunc(gl.ONE, gl.SRC_ALPHA);
         gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);

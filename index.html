@@ -48,16 +48,9 @@
     vec4 color;
     if (v > 1.0) {
     	vec4 textureColor = texture2D(uColorSampler, vec2(gl_FragCoord.x / uResolution.x, gl_FragCoord.y / uResolution.y) );
-      vec4 noiseColor = (texture2D(uNoiseSampler, gl_FragCoord.xy / 100.0 )) / 1.;
-      float l = length(noiseColor);
-      if(l > 1.05){
-      	vec4 mixedColor = textureColor + (noiseColor * 0.0001);
-				color = mixedColor;
-			}
-      else{
       	//discard;
-        color = textureColor * 0.85;
-			}
+        color = textureColor ;
+
 		}
     else {
     	discard;

@@ -1,9 +1,9 @@
 body {
   background-color: #101010;
-  color: #fff;
+  color: #333;
   margin: 0px;
   overflow: hidden;
-  cursor:url(../cursor-01.png), auto;
+  cursor:none;
   font-family:sans-serif;
 }
 
@@ -45,7 +45,7 @@ body {
 
 #back {
   transition: 1s ease;
-  background: #000;
+  background: #fff;
 }
 .metaball-canvas{
   width:100%;

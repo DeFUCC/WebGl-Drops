@@ -15,44 +15,29 @@ const drops = {
   radius: 20,
   radiusControl:1,
   back:document.getElementById('back').style,
-  overlay:document.getElementById('overlay').style,
-  time:1
+  overlay:document.getElementById('overlay'),
+  time:1,
+  cursorLayer:0
 };
 
 
 drops.keyFuncs = {
-  ' '() {
-    createdMetaballs.forEach(function(metaball) {
-      metaball.pause();
-    });
+  ' '() { createdMetaballs.forEach(function(metaball) { metaball.pause(); });
   },
-  '1'() {
-    drops.back.backgroundColor="#fff";
-  },
-  '0'() {
-    drops.back.backgroundColor="#000";
-  },
-  'q'() {
-    drops.time > -2 ? drops.time-=0.1 : false
-  },
-  'w'() {
-    drops.time < 2 ? drops.time+=0.1 : false
-  },
-  'a'() {
-    drops.time=1;
-  },
-  's'() {
-    drops.time=-1;
-  },
-  'z'() {
-    drops.radiusControl  > 0 ? drops.radiusControl-=0.001 : false
-  },
-  'x'() {
-    drops.radiusControl  < 2 ? drops.radiusControl+=0.001 : false
-  },
+  '1'() { drops.back.backgroundColor="#fff"; },
+  '0'() { drops.back.backgroundColor="#000"; },
+  'q'() { drops.time > -2 ? drops.time-=0.1 : false },
+  'w'() { drops.time < 2 ? drops.time+=0.1 : false },
+  'a'() {drops.time=1; },
+  's'() { drops.time=-1;},
+  'z'() { drops.radiusControl  > 0 ? drops.radiusControl-=0.001 : false },
+  'x'() { drops.radiusControl  < 2 ? drops.radiusControl+=0.001 : false },
   'd'() {
-    drops.overlay.opacity == 0.5 ? drops.overlay.opacity=0 : drops.overlay.opacity=0.5
-  }
+    drops.overlay.style.opacity == 0.5 ? drops.overlay.style.opacity=0 : drops.overlay.style.opacity=0.5
+  },
+  'p'() {exportCanvas(); },
+  'e'() { drops.cursorLayer > 0 ? drops.cursorLayer-- : undefined; },
+  'r'() { drops.cursorLayer < drops.layers.length ? drops.cursorLayer++ : undefined; }
 }
 
 function onClick(event) {
@@ -61,15 +46,20 @@ function onClick(event) {
 
 function onWheel(event) {
   let {deltaX,deltaY}=event;
-  if (drops.radiusControl>0 && deltaY<0) {drops.radiusControl-=0.005;event.preventDefault()}
+  console.log(event)
+  if (drops.radiusControl>0 && deltaY<0) {
+    drops.radiusControl-=0.005;
+  }
   if (drops.radiusControl<2.5 && deltaY>0) {drops.radiusControl+=0.005;event.preventDefault()}
   if (drops.radius>0 && deltaX<0) {drops.radius-=0.5;event.preventDefault()}
   if (drops.radius<=100 && deltaX>0) {drops.radius+=0.5;event.preventDefault()}
 }
 
 function onKey(event) {
-  event.preventDefault()
-  drops.keyFuncs[event.key] && drops.keyFuncs[event.key]()
+  if (drops.keyFuncs[event.key]) {
+    event.preventDefault()
+    drops.keyFuncs[event.key]()
+  }
 }
 
 drops.layers =[
@@ -201,38 +191,7 @@ var assetsToLoad = [{
 }];
 var assets = {};
 
-window.onload = preloadAssets;
-
-function preloadAssets() {
-
-
-  function checkIfAllAssetsAreLoaded() {
-    if (assetsIndexToLoad < assetsToLoad.length) {
-      loadAssetIndex(assetsIndexToLoad);
-    } else {
-      initialize();
-    }
-  }
-
-  function loadAssetIndex(index) {
-    var objectToLoad = assetsToLoad[index];
-
-    switch (objectToLoad.type) {
-      case 'texture':
-        var image = new Image();
-        image.onload = function(event) {
-          assets[objectToLoad.name] = this;
-          assetsIndexToLoad++;
-          checkIfAllAssetsAreLoaded();
-        };
-        image.crossOrigin = '';
-        image.src = objectToLoad.path + objectToLoad.src;
-        break;
-    }
-  }
-
-  loadAssetIndex(assetsIndexToLoad);
-}
+window.onload = initialize;
 
 function initialize() {
 
@@ -241,6 +200,7 @@ function initialize() {
   canvas.height = window.innerHeight;
   var glConfig = {
     premultipliedAlpha: true,
+    preserveDrawingBuffer: false,
     antialias: true,
     depth: true,
     alpha: true
@@ -302,15 +262,16 @@ function initialize() {
 
   metaballGroup.forEach(
     (group, i) => {
-      let ballGroup = new Metaballs(gl, group)
+
+      let ballGroup = new Metaballs(gl, group, undefined, i)
       createdMetaballs.push(ballGroup)
       setTimeout(ballGroup.fadeIn, i * 3000);
     }
   );
 
   window.addEventListener('resize', onWindowResize);
-  window.addEventListener('mousemove', onWindowMouseMove);
-  window.addEventListener('click', onClick);
+  drops.overlay.addEventListener('mousemove', onWindowMouseMove);
+  drops.overlay.addEventListener('click', onClick);
   window.addEventListener('keydown', onKey);
   window.addEventListener('wheel',onWheel)
 
@@ -318,8 +279,6 @@ function initialize() {
 
   step();
 }
-
-
 
 function generateGradientTexture(colors, vertical, debug) {
 
@@ -393,7 +352,18 @@ function onWindowResize(event) {
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 }
 
-
+function exportCanvas(){
+        var mycanvas = document.getElementById("metaball-canvas");
+        if(mycanvas && mycanvas.getContext) {
+            var img = mycanvas.toDataURL("image/png;base64;");
+            //img = img.replace("image/png","image/octet-stream"); // force download, user would have to give the file name.
+            // you can also use anchor tag with download attribute to force download the canvas with file name.
+            window.open(img,"","width=700,height=700");
+        }
+        else {
+             alert("Can not export");
+        }
+    }
 
 function onWindowMouseMove(event) {
   createdMetaballs.forEach(function(metaball) {
@@ -432,4 +402,6 @@ var step = function() {
     metaball.updateSimulation();
   });
   requestAnimationFrame(step);
+
+
 };
