@@ -1,3 +1,20 @@
+if (window.DeviceOrientationEvent) {
+
+console.log("DeviceOrientation is supported");
+
+window.addEventListener('deviceorientation', function(e){
+
+console.log("a = "+e. alpha); console. log("b = "+e. beta); console. log("Y = "+e. gamma);
+
+}, false);
+
+} else {
+
+console.log("Orientation is not supported")
+
+}
+
+
 const drops = {
   init: {
     minSpeed: 0.001,
@@ -18,41 +35,188 @@ const drops = {
   back:document.getElementById('back').style,
   overlay:document.getElementById('overlay'),
   time:1,
-  cursorLayer:0
+  cursorLayer:0,
+  pause() { createdMetaballs.forEach( (metaball) => { metaball.pause();}) }
 };
+
+drops.listen = () => {
+  window.addEventListener('resize', onWindowResize);
+  drops.overlay.addEventListener('mousemove', onWindowMouseMove);
+  drops.overlay.addEventListener('click', onClick);
+  window.addEventListener('keydown', onKey);
+  drops.overlay.addEventListener('wheel',onWheel)
+}
+
 
 
 drops.keyFuncs = {
-  ' '() { createdMetaballs.forEach(function(metaball) { metaball.pause(); });
-  },
-  '1'() { drops.back.backgroundColor="#fff"; },
-  '0'() { drops.back.backgroundColor="#000"; },
+  ' '() { drops.pause() },
+  'e'() { drops.back.backgroundColor="#fff"; },
+  'r'() { drops.back.backgroundColor="#000"; },
   'q'() { drops.time > -2 ? drops.time-=0.1 : false },
   'w'() { drops.time < 2 ? drops.time+=0.1 : false },
-  'a'() {drops.time=1; },
-  's'() { drops.time=-1;},
+  'a'() { drops.time=1; },
+  's'() { drops.time=-1; },
   'z'() { drops.radiusControl  > 0 ? drops.radiusControl-=0.001 : false },
   'x'() { drops.radiusControl  < 2 ? drops.radiusControl+=0.001 : false },
-  'd'() {
-    drops.overlay.style.opacity == 0.5 ? drops.overlay.style.opacity=0 : drops.overlay.style.opacity=0.5
-  },
-  'p'() {exportCanvas(); },
-  'e'() { drops.cursorLayer > 0 ? drops.cursorLayer-- : undefined; },
-  'r'() { drops.cursorLayer < drops.layers.length ? drops.cursorLayer++ : undefined; }
+  'd'() { drops.overlay.style.opacity == 0.5 ? drops.overlay.style.opacity=0 : drops.overlay.style.opacity=0.5 },
+  'p'() { exportCanvas(); },
+  '1'() { drops.cursorLayer =1 },
+  '2'() { drops.cursorLayer =2 },
+  '3'() { drops.cursorLayer =3 },
+  '4'() { drops.cursorLayer =4 },
+  '5'() { drops.cursorLayer =5 },
+  '6'() { drops.cursorLayer =6 },
+  '7'() { drops.cursorLayer =7 },
+  '0'() { drops.cursorLayer =0 },
+}
+
+function dampen({prop, value, speed=1, amp=1, shift=0, object=drops}) {
+  let obj = {};
+  obj[prop]=amp*value+shift+0.001;
+  obj.ease = {_p1: 1.70158,_p2: 2.5949095}
+  if (object.hasOwnProperty(prop)) {
+    TweenMax.to(object, speed, obj);
+  } else {
+    console.log('no such parameter')
+  }
+}
+
+drops.current={
+  radiusControl:drops.radiusControl,
+  radius:drops.radius
+};
+
+drops.MIDI = [];
+drops.MIDI[191]=[]; //camera knobs
+drops.MIDI[191][1]= (value) => { //Knob 1
+  dampen({
+  prop:'radiusControl',
+  value: value/127,
+  speed:1,
+  amp:3 })
+};
+drops.MIDI[191][2]= (value) => { //Knob 2
+  dampen({
+  prop:'radius',
+  value: value/127,
+  speed:1,
+  amp:200 })
+};
+drops.MIDI[191][5]= (value) => {
+  dampen({
+  prop:'time',
+  value: value/127,
+  speed:1,
+  amp:4,
+  shift:-2})
+};
+
+drops.MIDI[159]=[]; // camera keys
+drops.MIDI[159][76] = () => { drops.pause() };
+drops.MIDI[159][54] = () => { drops.cursorLayer=1 };
+drops.MIDI[159][56] = () => { drops.cursorLayer=2 };
+drops.MIDI[159][58] = () => { drops.cursorLayer=3 };
+drops.MIDI[159][61] = () => { drops.cursorLayer=4 };
+drops.MIDI[159][63] = () => { drops.cursorLayer=5 };
+drops.MIDI[159][66] = () => { drops.cursorLayer=6 };
+drops.MIDI[159][68] = () => { drops.cursorLayer=7 };
+drops.MIDI[159][75] = () => { drops.cursorLayer=0 };
+drops.MIDI[159][71] = () => { drops.back.backgroundColor="#fff" };
+drops.MIDI[159][72] = () => { drops.back.backgroundColor="#000" };
+drops.MIDI[159][74] = () => {
+  drops.overlay.style.opacity > 0 ? drops.overlay.style.opacity=0 : drops.overlay.style.opacity=0.5
+};
+
+drops.MIDI[144]= (key,vel) => { //KICK
+  drops.current.radiusControl = drops.radiusControl;
+  dampen({
+  prop:'radiusControl',
+  value: drops.radiusControl*1.05,
+  speed:0.1})
+} //kick down
+drops.MIDI[128]= (key,vel) => {
+  dampen({
+  prop:'radiusControl',
+  value: drops.current.radiusControl,
+  speed:0.3})
+} //kick down
+
+drops.MIDI[145]= (key,vel) => { //SNARE
+  drops.current.radius = drops.radius;
+  dampen({
+  prop:'radius',
+  value: drops.radius+20,
+  speed:0.01})
+} //snare down
+drops.MIDI[129]= (key,vel) => {
+  dampen({
+  prop:'radius',
+  value: drops.current.radius,
+  speed:0.3})
+} //snare down
+
+function onMIDIMessage (message) {
+  data = message.data;
+  if ( drops.MIDI[data[0]]) {
+    if  (drops.MIDI[data[0]][data[1]])  {
+        drops.MIDI[data[0]][data[1]](data[2])
+    } else if (typeof drops.MIDI[data[0]] === 'function') {
+      drops.MIDI[data[0]](data[1],data[2]);
+    } else {console.log(data)}
+  } else {
+  //  console.log(data)
+  }
+}
+
+// request MIDI access
+if (navigator.requestMIDIAccess) {
+    navigator.requestMIDIAccess({
+        sysex: false // this defaults to 'false' and we won't be covering sysex in this article.
+    }).then(onMIDISuccess, onMIDIFailure);
+} else {
+    console.log("No MIDI support in your browser.");
+}
+
+// midi functions
+function onMIDISuccess(midi) {
+    var inputs = midi.inputs.values();
+    // when we get a succesful response, run this code
+    for (var input = inputs.next();
+       input && !input.done;
+       input = inputs.next()) {
+      // each time there is a midi message call the onMIDIMessage function
+      input.value.onmidimessage = onMIDIMessage;
+    }
+    console.log('MIDI ready')
+}
+
+function onMIDIFailure(e) {
+    // when we get a failed response, run this code
+    console.log("No access to MIDI devices or your browser doesn't support WebMIDI API. Please use WebMIDIAPIShim " + e);
 }
 
 function onClick(event) {
-  drops.keyFuncs[' ']();
+  drops.pause();
 }
 
 function onWheel(event) {
   let {deltaX,deltaY}=event;
-  if (drops.radiusControl>0 && deltaY<0) {
-    drops.radiusControl-=0.005;
+  if (drops.radiusControl>0 && deltaY<0 || drops.radiusControl<1.5 && deltaY>0) {
+    console.log(deltaY)
+    dampen({
+      prop:'radiusControl',
+      value:drops.radiusControl+deltaY*0.01
+    });
+    event.preventDefault()
   }
-  if (drops.radiusControl<2.5 && deltaY>0) {drops.radiusControl+=0.005;event.preventDefault()}
-  if (drops.radius>0 && deltaX<0) {drops.radius-=0.5;event.preventDefault()}
-  if (drops.radius<=100 && deltaX>0) {drops.radius+=0.5;event.preventDefault()}
+  if(deltaX!=0) {event.preventDefault()}
+  if (drops.radius>0 && deltaX<0 || drops.radius<=100 && deltaX>0) {
+    dampen({
+      prop:'radius',
+      value:drops.radius+deltaX
+    });
+  }
 }
 
 function onKey(event) {
@@ -268,11 +432,7 @@ function initialize() {
     }
   );
 
-  window.addEventListener('resize', onWindowResize);
-  drops.overlay.addEventListener('mousemove', onWindowMouseMove);
-  drops.overlay.addEventListener('click', onClick);
-  window.addEventListener('keydown', onKey);
-  window.addEventListener('wheel',onWheel)
+  drops.listen();
 
   resizeGL(gl);
 

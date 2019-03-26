@@ -210,8 +210,20 @@ function Metaballs(gl, config, targetScreenSize,layerId){
      * Handle Mouse Move
      */
     this.handleMouseMove = function(x, y){
-        mousePosition.x = x*window.devicePixelRatio;
-        mousePosition.y = window.innerHeight - y*window.devicePixelRatio;
+      dampen({
+        object:mousePosition,
+        prop:'x',
+        value: x*window.devicePixelRatio,
+        speed:1
+      });
+      dampen({
+        object:mousePosition,
+        prop:'y',
+        value: window.innerHeight - y*window.devicePixelRatio,
+        speed:1
+      });
+    //    mousePosition.x = x*window.devicePixelRatio;
+    //    mousePosition.y = window.innerHeight - y*window.devicePixelRatio;
     }
 
     this.pause = function() {
