@@ -3,13 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>webgl metaballs</title>
-
-
-
-      <link rel="stylesheet" href="css/style.css">
-
-
+  <title>drops by tsoop</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
@@ -20,6 +15,7 @@
   	gl_Position = vec4(position, 0.0, 1.0);
 	}
 </script>
+
 <script type="x-shader/x-fragment" id="fragmentMetaballs">
 	precision highp float;
   const int NUM_METABALLS = 15;
@@ -27,15 +23,12 @@
   uniform vec3 metaballs[15];
   uniform vec2 uResolution;
   uniform sampler2D uColorSampler;
-  uniform sampler2D uNoiseSampler;
   uniform float uTime;
 
 	void main(){
   	float x = gl_FragCoord.x;
     float y = gl_FragCoord.y;
     float v = 0.0;
-    float radius = 2.0;
-    float speed = 1.5;
     for (int i = 0; i < NUM_METABALLS; i++) {
     	vec3 mb = metaballs[i];
 			float dx = mb.x - x;
