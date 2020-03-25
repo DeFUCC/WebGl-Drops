@@ -29,7 +29,7 @@ const drops = {
     maxMultiplierArcY: 5,
     scale: 1.5
   },
-  count:14,
+  count:12,
   radius: 20,
   radiusControl:1,
   back:document.getElementById('back').style,

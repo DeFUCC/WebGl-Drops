@@ -17,10 +17,10 @@
 </script>
 
 <script type="x-shader/x-fragment" id="fragmentMetaballs">
-	precision highp float;
-  const int NUM_METABALLS = 15;
+	precision mediump float;
+  const int NUM_METABALLS = 13;
 
-  uniform vec3 metaballs[15];
+  uniform vec3 metaballs[13];
   uniform vec2 uResolution;
   uniform sampler2D uColorSampler;
   uniform float uTime;
@@ -33,7 +33,6 @@
     	vec3 mb = metaballs[i];
 			float dx = mb.x - x;
 			float dy = mb.y - y;
-
       float r = mb.z;
       v += r*r/(dx*dx + dy*dy);
 		}
@@ -58,13 +57,12 @@
 
   <canvas id="metaball-canvas" class="metaball-canvas"></canvas>
   <div id="overlay"><h1>drops</h1><h2>by tsoop</h2></div>
-</div>
+</div>  
+
+
   <script src='js/Metaballs.js'></script>
-<script src='js/TweenMax.min.js'></script>
-
-
-
-    <script  src="js/index.js"></script>
+  <script src='js/TweenMax.min.js'></script>
+  <script src="js/index.js"></script>
 
 
 
