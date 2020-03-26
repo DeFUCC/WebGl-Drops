@@ -219,7 +219,7 @@ function Metaballs(gl, config, targetScreenSize,layerId){
       dampen({
         object:mousePosition,
         prop:'y',
-        value: window.innerHeight - y*window.devicePixelRatio,
+        value: window.innerHeight*window.devicePixelRatio - y*window.devicePixelRatio,
         speed:1
       });
     //    mousePosition.x = x*window.devicePixelRatio;

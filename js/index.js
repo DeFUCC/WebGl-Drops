@@ -68,6 +68,8 @@ drops.keyFuncs = {
   '5'() { drops.cursorLayer =5 },
   '6'() { drops.cursorLayer =6 },
   '7'() { drops.cursorLayer =7 },
+  '8'() { drops.cursorLayer =8 },
+  '9'() { drops.cursorLayer =9 },
   '0'() { drops.cursorLayer =0 },
 }
 
@@ -333,6 +335,34 @@ drops.layers =[
       stop: .4
     }, {
       color: '#cd7efc',
+      stop: .7
+    }]
+  },
+  {
+    radius:0.2,
+    angle:false,
+    gradient:[{
+      color: '#345',
+      stop: 0.2
+    }, {
+      color: '#456',
+      stop: .4
+    }, {
+      color: '#567',
+      stop: .7
+    }]
+  },
+  {
+    radius:0.3,
+    angle:true,
+    gradient:[{
+      color: '#980',
+      stop: 0.2
+    }, {
+      color: '#af0',
+      stop: .4
+    }, {
+      color: '#ff0',
       stop: .7
     }]
   },
